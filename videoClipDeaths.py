@@ -1,12 +1,15 @@
-
 import cv2
 import numpy as np
 
 def get_attempt_area(frame):
     return frame[0:100, 390:480]       
 
-def attempt_has_changed(frame1_attempt_area, frame_2_attempt_area, tolerance=30000): # !!!! TOL
-    diff = frame1_attempt_area - frame_2_attempt_area
+def attempt_has_changed(frame1_attempt_area, frame2_attempt_area, tolerance=0): # !!!! TOL
+    
+    frame1_attempt_area = cv2.inRange(frame1_attempt_area, np.asarray([220, 220, 220]), np.asarray([255, 255, 255]))
+    frame2_attempt_area = cv2.inRange(frame2_attempt_area, np.asarray([220, 220, 220]), np.asarray([255, 255, 255]))
+
+    diff = frame1_attempt_area - frame2_attempt_area
     
     m_norm = np.sum(abs(diff))         # Manhattan norm
     #z_norm = norm(diff.ravel(), 0)    # Zero norm
@@ -47,7 +50,7 @@ def videoFindDeaths(vidPath):
     return deathFrames, total_frames
 
 
-def get_video_segment(videoPath, skip_len=1):
+def get_video_segment(videoPath, skip_prev_len=20, skip_next_len=20):
     vidPath = videoPath
    
 
@@ -59,14 +62,14 @@ def get_video_segment(videoPath, skip_len=1):
     print("Deathframes: " + str(deathFrames))
     for death in deathFrames:
         print("OFFSET" + str(offset))
-        if (death-skip_len < offset):
-            offset = death+skip_len
+        if (death-skip_prev_len < offset):
+            offset = death+skip_next_len
         else:
-            segRange.append((offset, (death-skip_len)))
-            offset = death+skip_len
+            segRange.append((offset, (death-skip_prev_len)))
+            offset = death+skip_next_len
             # If deaths overlap (offset has to be higher than 0)
-            if death-skip_len < offset:
-                offset = death+skip_len
+            if death-skip_prev_len < offset:
+                offset = death+skip_next_len
     
 
     if offset < total_frames:
@@ -80,12 +83,12 @@ def get_video_segment(videoPath, skip_len=1):
 
     return segRange
 
-def videoClipDeaths(videoPath, output, skip_len=1):
+def videoClipDeaths(videoPath, output, skip_prev_len=20, skip_next_len=20):
 
     vidPath = videoPath
     shotsPath = output
     
-    segRange = get_video_segment(vidPath, skip_len)
+    segRange = get_video_segment(vidPath, skip_prev_len, skip_next_len)
     if not segRange:
         print("Empty segment range")
         return None

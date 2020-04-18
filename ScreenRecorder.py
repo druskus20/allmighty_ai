@@ -4,6 +4,7 @@ import cv2
 import time
 import signal
 import sys
+import win32api as wapi
 from scipy.linalg import norm
 
 # This class will contain all the screen capture functionality
@@ -15,6 +16,7 @@ class ScreenRecorder(object):
     
     buffer_write = None     # Write pointer
     buffer_read = None      # Read pointer
+    space_pressed = False
 
     attempt_startime = 0
     attempt_endtime = 0
@@ -36,14 +38,20 @@ class ScreenRecorder(object):
         self.buffer_write = np.zeros(self.dimmensions, dtype=np.int8)
         self.buffer_read = np.zeros(self.dimmensions, dtype=np.int8)
 
-
+        self.space_pressed = False   
 
     def resize_image(self, image, res=(720, 576)):
         pr_image = cv2.resize(image, res)
         return np.asarray(pr_image, dtype=np.uint8)
 
     # Grabs a frame and sotores it in buffer[buffer_head]
+    # Also grabs the key value
     def refresh_frame(self):
+        if wapi.GetAsyncKeyState(32):
+            self.space_pressed = True
+        else:
+            self.space_pressed = False
+            
         self.buffer_write = self.grb.grab(None)
         self.buffer_write, self.buffer_read = self.buffer_read, self.buffer_write
         
@@ -53,7 +61,7 @@ class ScreenRecorder(object):
     def get_newest_frame(self):
         return self.buffer_read
 
-    def capture_live(self, show=False, save=False, savePath="unnamed.mp4"):
+    def capture_live(self, show=False, save=False, savePath="unnamed.mp4", time_frame=5):
         
         time_start = time.time()
         if save and (savePath != None): 
@@ -66,10 +74,11 @@ class ScreenRecorder(object):
         while True:
             
             # Cambiar por tecla !!!
-            if time.time() - time_start > 5:
+            if time.time() - time_start > time_frame:
                 break
 
             self.refresh_frame()
+            print("SPACE_PRESSED? " + str(self.space_pressed))
             self.update_attempt()
             
             # Muestra la grabacion
