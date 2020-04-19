@@ -17,6 +17,7 @@ from ctypes.wintypes import (
     UINT,
     LPVOID,
 )
+
 import numpy as np
 
 SRCCOPY = 0x00CC0020
