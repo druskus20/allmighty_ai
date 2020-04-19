@@ -1,0 +1,26 @@
+from ScreenRecorder import ScreenRecorder 
+from keyboard_controller import KeyboardController
+import time
+
+
+
+
+def main():
+
+    n = ScreenRecorder((1, 26, 720+1, 576+26))
+    
+    controller = KeyboardController()
+    controller.iniciarJuego()
+    time.sleep(10)
+    controller.position_window()
+    time.sleep(3)
+    print("COMENZAMOS")
+    controller.iniciarPartida()
+
+    time.sleep(2)
+
+    n.capture_live(show=False, save=True, savePath="video.mp4", time_frame=60)
+
+    controller.finJuego()
+if __name__ == "__main__":
+    main()

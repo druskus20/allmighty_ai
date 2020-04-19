@@ -3,6 +3,35 @@
 *.core
 .vscode
 
+# Impossible game files
+ALURE32.dll
+Editor.bat
+IGG-GAMES.COM.url
+ImpossibleGame.exe
+OpenAL32.dll
+Profile
+README.txt
+SDL2.dll
+SDL2_image.dll
+__pycache__
+debug.log
+editor
+libltdl-7.dll
+libmpg123-0.dll
+libogg.dll
+libpng16-16.dll
+libvorbis.dll
+libvorbisfile.dll
+licenses
+lista
+res
+save.bin
+settings.ini
+steam_api.dll
+steam_appid.txt
+zlib1.dll
+
+
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
