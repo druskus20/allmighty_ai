@@ -13,7 +13,7 @@ class ScreenRecorder(object):
     dimmensions = None # Screen area
 
     attempt = 1
-    
+    keypresses = []
     buffer_write = None     # Write pointer
     buffer_read = None      # Read pointer
     space_pressed = False
@@ -62,7 +62,7 @@ class ScreenRecorder(object):
         return self.buffer_read
 
     def capture_live(self, show=False, save=False, savePath="unnamed.mp4", time_frame=5, cut_attempt=False):
-        
+      
         time_start = time.time()
         if save and (savePath != None): 
             fps=60 # !!!
@@ -83,6 +83,7 @@ class ScreenRecorder(object):
                 break
 
             self.refresh_frame()
+            self.keypresses.append(self.key_check(32))
             self.update_attempt()
                     
             # Recortar el frame
@@ -101,12 +102,13 @@ class ScreenRecorder(object):
                 #frame = self.buffer_read
                 time.sleep(0.01)
                 writer.write(frame)
-
-            # Save array numpy
-            # !!!!
     
         if save: 
+            print("GUARDADO")
             writer.release()
+            np.asarray(self.keypresses)
+            print(np.asarray(self.keypresses))
+            np.savez_compressed("keypresses_raw.npz", self.keypresses, allow_pickle=True)
 
     def update_attempt(self, tolerance=0):
         last_frame = self.get_attempt_area(self.buffer_read)
@@ -142,5 +144,12 @@ class ScreenRecorder(object):
     def reduce_frame(self, frame):
         return frame[100:, 200:] 
 
+
+
+    def key_check(self, key):
+        if wapi.GetAsyncKeyState( key):
+            print("SPACE PRESSED " + str(key))
+            return True
+        return False
 
        

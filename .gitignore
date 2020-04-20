@@ -2,6 +2,8 @@
 *.jpg
 *.core
 .vscode
+*.npy
+*.npz
 
 # Impossible game files
 ALURE32.dll

@@ -4,6 +4,8 @@ import numpy as np
 def get_attempt_area(frame):
     return frame[0:100, 390:480]       
 
+
+
 def attempt_has_changed(frame1_attempt_area, frame2_attempt_area, tolerance=0): # !!!! TOL
     
     frame1_attempt_area = cv2.inRange(frame1_attempt_area, np.asarray([220, 220, 220]), np.asarray([255, 255, 255]))
@@ -73,7 +75,7 @@ def get_video_segment(videoPath, skip_prev_len=20, skip_next_len=20):
     
 
     if offset < total_frames:
-        segRange.append((offset, total_frames))
+        segRange.append((offset, total_frames-1))
 
     if len(segRange) == 0:
         return None
@@ -87,24 +89,39 @@ def videoClipDeaths(videoPath, output, skip_prev_len=20, skip_next_len=20, cut_a
 
     vidPath = videoPath
     shotsPath = output
+    keypresses = np.load('keypresses_raw.npz',  allow_pickle=True)['arr_0']
     
     segRange = get_video_segment(vidPath, skip_prev_len, skip_next_len)
+    
+
+
     if not segRange:
         print("Empty segment range")
         return None
     print (f"Segments: {segRange}")
 
+
+    ## CUT KEYS ###
+    new_keypresses = []
+    for r in segRange:
+        print(f"aaaa {int(r[0])}:{int(r[1])}")
+        print(f"aaaa {keypresses[int(r[0]):int(r[1])]}")
+        new_keypresses.extend(keypresses[int(r[0]):int(r[1])])
+
+    np.savez_compressed("keypresses_nodeaths.npz", np.asarray(new_keypresses))
+
+    ### CUT VIDEO ###
     # Open the video
     cap = cv2.VideoCapture(vidPath)
     fps = int(cap.get(cv2.CAP_PROP_FPS))
 
-
+    
     
     size = (int(cap.get(cv2.CAP_PROP_FRAME_WIDTH)),int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT)))
     if cut_attempt == True:
         size = (int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))-200,int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))-100)
        
-
+    new_frames =  []
     dimmensions = size + (3, )
     frame =  np.zeros(dimmensions, dtype=np.int8)
     fourcc = cv2.VideoWriter_fourcc(*'XVID')
@@ -117,20 +134,22 @@ def videoClipDeaths(videoPath, output, skip_prev_len=20, skip_next_len=20, cut_a
         while (cap.isOpened() and ret and writer.isOpened()):
             ret, frame = cap.read()
             frame_number = cap.get(cv2.CAP_PROP_POS_FRAMES) - 1
-    
-            # Cut attempt area
-            if cut_attempt == True:
-                frame = frame[100:, 200:] 
+
                 
+            # Cut attempt area
+            if cut_attempt == True and frame is not None:
+                frame = frame[100:, 200:]   
 
             # End contition
             if frame_number < endFidx:
                 writer.write(frame)
+                new_frames.append(frame)
             else:
                 break
 
     writer.release()
- 
+    np.savez_compressed("FRAMES.npz", np.asarray(new_frames), allow_pickle=True)
+
     # Check how many frame that new.avi has
     cap2 = cv2.VideoCapture(shotsPath)
     print(cap2.get(cv2.CAP_PROP_FRAME_COUNT))
