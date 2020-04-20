@@ -2,12 +2,9 @@ import datetime
 import glob
 import logging
 import os
-import random
 from typing import Iterable, Sized, List, Set
 
 import numpy as np
-import torch
-from model_pytorch import TEDD1104
 
 try:
     import cupy as cp
@@ -63,15 +60,13 @@ def reshape_y(data: np.ndarray) -> np.ndarray:
 
 
 def reshape_x_numpy(
-        data: np.ndarray, dtype=np.float16, hide_map_prob: float = 0.0
-) -> np.ndarray:
+        data: np.ndarray, dtype=np.float16) -> np.ndarray:
     """
     Get images from data as a list and preprocess them.
     Input:
      - data: ndarray [num_examples x 6]
      -dtype: numpy dtype for the output array
-     -hide_map_prob: Probability for removing the minimap (black square)
-      from the sequence of images (0<=hide_map_prob<=1)
+      from the sequence of images
     Output:
     - ndarray [num_examples * 5, num_channels, H, W]
     """
@@ -79,28 +74,21 @@ def reshape_x_numpy(
     std = np.array([0.229, 0.224, 0.225], dtype)
     reshaped = np.zeros((len(data) * 5, 3, 270, 480), dtype=dtype)
     for i in range(0, len(data)):
-        black_minimap: bool = (random.random() <= hide_map_prob)
         for j in range(0, 5):
-            img = np.array(data[i][j], dtype=dtype)
-            if black_minimap:  # Put a black square over the minimap
-                img[215:, :80] = np.zeros((55, 80, 3), dtype=dtype)
-
-            reshaped[i * 5 + j] = np.rollaxis((img / dtype(255.0)) - mean / std, 2, 0)
+            img = np.array(data[i][j], dtype=dtype) / 255
+            reshaped[i * 5 + j] = np.rollaxis((img - mean) / std, 2)
 
     return reshaped
 
 
 if cupy:
-    def reshape_x_cupy(
-            data: np.ndarray, dtype=cp.float16, hide_map_prob: float = 0.0
-    ) -> np.ndarray:
+    def reshape_x_cupy(data: np.ndarray, dtype=cp.float16) -> np.ndarray:
         """
         Get images from data as a list and preprocess them (using GPU).
         Input:
          - data: ndarray [num_examples x 6]
          -dtype: numpy dtype for the output array
-         -hide_map_prob: Probability for removing the minimap (black square)
-          from the sequence of images (0<=hide_map_prob<=1)
+          from the sequence of images
         Output:
         - ndarray [num_examples * 5, num_channels, H, W]
         """
@@ -109,51 +97,40 @@ if cupy:
         std = cp.array([0.229, 0.224, 0.225], dtype=dtype)
         reshaped = np.zeros((len(data) * 5, 3, 270, 480), dtype=dtype)
         for i in range(0, len(data)):
-            black_minimap: bool = (random.random() <= hide_map_prob)
             for j in range(0, 5):
-                img = cp.array(data[i][j], dtype=dtype)
-                if black_minimap:  # Put a black square over the minimap
-                    img[215:, :80] = cp.zeros((55, 80, 3), dtype=dtype)
-
-                reshaped[i * 5 + j] = cp.asnumpy(
-                    cp.rollaxis((img / dtype(255.0)) - mean / std, 2, 0, )
-                )
-
+                img = cp.array(data[i][j], dtype=dtype) / 255
+                reshaped[i * 5 + j] = cp.asnumpy(cp.rollaxis((img - mean) / std, 2))
         return reshaped
 
 
-def reshape_x(data: np.ndarray, fp=16, hide_map_prob: float = 0.0) -> np.ndarray:
+def reshape_x(data: np.ndarray, fp=16) -> np.ndarray:
     """
     Get images from data as a list and preprocess them, if cupy is available it uses the GPU,
     else it uses the CPU (numpy)
     Input:
      - data: ndarray [num_examples x 6]
      - fp: floating-point precision: Available values: 16, 32, 64
-     -hide_map_prob: Probability for removing the minimap (black square) from the image (0<=hide_map_prob<=1)
     Output:
     - ndarray [num_examples * 5, num_channels, H, W]
     """
-    assert (
-            0 <= hide_map_prob <= 1
-    ), f"Hide map prob must be between 0.0 and 1.0. Hide map prob: {hide_map_prob}"
     if cupy:
         if fp == 16:
-            return reshape_x_cupy(data, dtype=cp.float16, hide_map_prob=hide_map_prob)
+            return reshape_x_cupy(data, dtype=cp.float16)
         elif fp == 32:
-            return reshape_x_cupy(data, dtype=cp.float32, hide_map_prob=hide_map_prob)
+            return reshape_x_cupy(data, dtype=cp.float32)
         elif fp == 64:
-            return reshape_x_cupy(data, dtype=cp.float64, hide_map_prob=hide_map_prob)
+            return reshape_x_cupy(data, dtype=cp.float64)
         else:
             raise ValueError(
                 f"Invalid floating-point precision: {fp}: Available values: 16, 32, 64"
             )
     else:
         if fp == 16:
-            return reshape_x_numpy(data, dtype=np.float16, hide_map_prob=hide_map_prob)
+            return reshape_x_numpy(data, dtype=np.float16)
         elif fp == 32:
-            return reshape_x_numpy(data, dtype=np.float32, hide_map_prob=hide_map_prob)
+            return reshape_x_numpy(data, dtype=np.float32)
         elif fp == 64:
-            return reshape_x_numpy(data, dtype=np.float64, hide_map_prob=hide_map_prob)
+            return reshape_x_numpy(data, dtype=np.float64)
         else:
             raise ValueError(
                 f"Invalid floating-point precision: {fp}: Available values: 16, 32, 64"
@@ -197,42 +174,14 @@ def nn_batchs(X: Sized, y: Sized, n: int = 1, sequence_size: int = 5) -> Iterabl
         yield b_X, bg_y
 
 
-def evaluate(
-        model: TEDD1104,
-        X: torch.tensor,
-        golds: torch.tensor,
-        device: torch.device,
-        batch_size: int,
-) -> float:
-    """
-    Given a set of input examples and the golds for these examples evaluates the model accuracy
-    Input:
-     - model: TEDD1104 model to evaluate
-     - X: input examples [num_examples, sequence_size, 3, H, W]
-     - golds: golds for the input examples [num_examples]
-     - device: string, use cuda or cpu
-     -batch_size: integer batch size
-    Output:
-    - Accuracy: float
-    """
-    model.eval()
-    correct = 0
-    for X_batch, y_batch in nn_batchs(X, golds, batch_size):
-        predictions: np.ndarray = model.predict(X_batch.to(device)).cpu().numpy()
-        correct += np.sum(predictions == y_batch)
-
-    return correct / len(golds)
-
-
 def load_file(
-        path: str, fp: int = 16, hide_map_prob: float = 0.0
+        path: str, fp: int = 16
 ) -> (np.ndarray, np.ndarray):
     """
     Load dataset from file: Load, reshape and preprocess data.
     Input:
      - path: Path of the dataset
      - fp: floating-point precision: Available values: 16, 32, 64
-     -hide_map_prob: Probability for removing the minimap (black square) from the image (0<=hide_map_prob<=1)
     Output:
     - X: input examples [num_examples, 5, 3, H, W]
     - y: golds for the input examples [num_examples]
@@ -249,7 +198,7 @@ def load_file(
         return np.array([]), np.array([])
 
     if check_valid_y(data):
-        X = reshape_x(data, fp, hide_map_prob)
+        X = reshape_x(data, fp)
         y = reshape_y(data)
         return X, y
 
@@ -258,7 +207,7 @@ def load_file(
         return np.array([]), np.array([])
 
 
-def load_dataset(path: str, fp: int = 16) -> (np.ndarray, np.ndarray):
+def load_dataset(path: str, fp: int = 32) -> (np.ndarray, np.ndarray):
     """
     Load dataset from directory: Load, reshape and preprocess data for all the files in a directory.
     Input:
@@ -291,9 +240,7 @@ def load_dataset(path: str, fp: int = 16) -> (np.ndarray, np.ndarray):
     return X, y
 
 
-def load_and_shuffle_datasets(
-        paths: List[str], hide_map_prob: float, fp: int = 16
-) -> (np.ndarray, np.ndarray):
+def load_and_shuffle_datasets(paths: List[str], fp: int = 32) -> (np.ndarray, np.ndarray):
     """
     Load multiple dataset files and shuffle the data, useful for training
     Input:
@@ -308,7 +255,7 @@ def load_and_shuffle_datasets(
     for file_no, file in enumerate(paths):
         # print(f"Loading file {file_no+1} of {len(paths)}...")
         try:
-            data: np.ndarray = np.load(file, allow_pickle=True)["arr_0"]
+            data: np.ndarray = np.load(file, allow_pickle=True, fp=fp)["arr_0"]
         except (IOError, ValueError) as err:
             logging.warning(f"[{err}] Error in file: {file}, ignoring the file.")
             continue
@@ -336,13 +283,13 @@ def load_and_shuffle_datasets(
         logging.warning(f"Empty dataset, all files invalid. Path: {paths}")
         return np.array([]), np.array([])
 
-    X: np.ndarray = reshape_x(data_array, fp, hide_map_prob)
+    X: np.ndarray = reshape_x(data_array, fp)
     y: np.ndarray = reshape_y(data_array)
 
     return X, y
 
 
-def printTrace(message: str) -> None:
+def print_trace(message: str) -> None:
     """
     Print a message in the <date> : message format
     Input:
@@ -350,48 +297,3 @@ def printTrace(message: str) -> None:
     Output:
     """
     print("<" + str(datetime.datetime.now()) + ">  " + str(message))
-
-
-def mse_numpy(image1: np.ndarray, image2: np.ndarray) -> np.float:
-    """
-    Mean squared error between two numpy ndarrays
-    Input:
-     - image1: fist array
-     - image2: second numpy ndarray
-    Ouput:
-     - Mean squared error numpy.float
-    """
-    err = np.float(np.sum((image1 - image2) ** 2))
-    err /= np.float(image1.shape[0] * image1.shape[1])
-    return err
-
-
-if cupy:
-    def mse_cupy(image1: cp.ndarray, image2: cp.ndarray) -> np.float:
-        """
-        Mean squared error between two cupy ndarrays
-        Input:
-         - image1: fist array
-         - image2: second numpy ndarray
-        Ouput:
-         - Mean squared error numpy.float
-         """
-        err = np.float(cp.sum((image1 - image2) ** 2))
-        err /= np.float(image1.shape[0] * image1.shape[1])
-        return err
-
-
-def mse(image1: np.ndarray, image2: np.ndarray) -> np.float:
-    """
-    Mean squared error between two numpy ndarrays.
-    If available we will use the GPU (cupy) else we will use the CPU (numpy)
-    Input:
-     - image1: fist numpy ndarray
-     - image2: second numpy ndarray
-    Ouput:
-     - Mean squared error numpy.float
-     """
-    if cupy:
-        return mse_cupy(cp.asarray(image1), cp.asarray(image2))
-    else:
-        return mse_numpy(image1, image2)

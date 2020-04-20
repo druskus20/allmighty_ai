@@ -4,7 +4,6 @@ import threading
 import time
 
 import numpy as np
-
 from keyboard.keys import key_check
 from screen import recorder as screen_recorder
 

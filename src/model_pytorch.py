@@ -2,19 +2,22 @@ import json
 import os
 from typing import List, Union
 
+import numpy as np
 import torch
 import torch.nn as nn
 import torchvision.models as models
 import torchvision.models.resnet
+
+from src.utils import nn_batchs
 
 
 def get_resnet(model: int, pretrained: bool) -> torchvision.models.resnet.ResNet:
     """
     Get resnet model
     Output:
-     torchvision.models.resnet[18,34,50,101,152]
+     torchvision.model.resnet[18,34,50,101,152]
     Hyperparameters:
-    - model: Resnet model from torchvision.models (number of layers): [18,34,50,101,152]
+    - model: Resnet model from torchvision.model (number of layers): [18,34,50,101,152]
     - pretrained: Load model pretrained weights
     """
     if model == 18:
@@ -28,7 +31,7 @@ def get_resnet(model: int, pretrained: bool) -> torchvision.models.resnet.ResNet
     elif model == 152:
         return models.resnet152(pretrained=pretrained)
 
-    raise ValueError(f"Resnet_{model} not found in torchvision.models")
+    raise ValueError(f"Resnet_{model} not found in torchvision.model")
 
 
 class EncoderCNN(nn.Module):
@@ -555,3 +558,30 @@ def load_checkpoint(
         fp16,
         opt_level,
     )
+
+
+def evaluate(
+        model: TEDD1104,
+        X: torch.tensor,
+        golds: torch.tensor,
+        device: torch.device,
+        batch_size: int,
+) -> float:
+    """
+    Given a set of input examples and the golds for these examples evaluates the model accuracy
+    Input:
+     - model: TEDD1104 model to evaluate
+     - X: input examples [num_examples, sequence_size, 3, H, W]
+     - golds: golds for the input examples [num_examples]
+     - device: string, use cuda or cpu
+     -batch_size: integer batch size
+    Output:
+    - Accuracy: float
+    """
+    model.eval()
+    correct = 0
+    for X_batch, y_batch in nn_batchs(X, golds, batch_size):
+        predictions: np.ndarray = model.predict(X_batch.to(device)).cpu().numpy()
+        correct += np.sum(predictions == y_batch)
+
+    return correct / len(golds)
