@@ -7,9 +7,10 @@ import cv2
 import numpy as np
 from keyboard.input_handler import select_key
 from keyboard.keys import key_check, key_press
-from model_keras import load_model
 from screen import recorder as screen_recorder
-from utils import reshape_x
+from tensorflow.keras.models import load_model
+
+from src.keras.train import reshape_x
 
 
 def run_keras(
@@ -37,7 +38,7 @@ def run_keras(
 
     show_what_ai_sees: bool = False
     fp16: bool
-    model = load_model(save_dir=model_dir)
+    model = load_model(model_dir)
     stop_recording: threading.Event = threading.Event()
 
     th_img: threading.Thread = threading.Thread(
@@ -59,15 +60,15 @@ def run_keras(
         l.pack()
 
     last_time: float = time.time()
-    model_prediction: np.ndarray = np.asarray([0])
+    model_prediction = np.asarray([0])
 
     while True:
         img_seq = screen_recorder.seq.copy()
         keys = key_check()
         if not "J" in keys:
-            X = reshape_x(np.array([img_seq]), fp=32)
+            X = reshape_x(np.array([img_seq]))
             model_prediction = model.predict(X)
-            select_key(int(model_prediction[0]))
+            select_key(model_prediction.argmax(axis=-1))
 
             if show_current_control:
                 var.set("T.E.D.D. 1104 Driving")
@@ -156,8 +157,5 @@ if __name__ == "__main__":
 
     run_keras(
         model_dir=args.model_dir,
-        fp16=args.fp16,
-        enable_evasion=args.enable_evasion,
         show_current_control=args.show_current_control,
-        evasion_score=args.evasion_score,
     )

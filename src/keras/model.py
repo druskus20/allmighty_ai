@@ -1,5 +1,3 @@
-import os
-
 from tensorflow.keras import Sequential, optimizers
 from tensorflow.keras import initializers
 from tensorflow.keras.layers import Convolution2D, MaxPooling2D, Dropout, TimeDistributed, Flatten, GRU, Dense
@@ -47,7 +45,3 @@ def get_model(img_res, num_img_per_seq, num_cls, selected_model='CNN+RNN'):
         opt = optimizers.RMSprop(lr=0.001)
         model.compile(loss='mean_squared_error', optimizer=opt, metrics=['accuracy'])
         return model
-
-
-def load_model(save_dir):
-    return load_model(os.path.join(save_dir, "keras-model"))

@@ -104,10 +104,8 @@ class ScreenRecorder(object):
                 writer.write(frame)
     
         if save: 
-            print("GUARDADO")
             writer.release()
             np.asarray(self.keypresses)
-            print(np.asarray(self.keypresses))
             np.savez_compressed("keypresses_raw.npz", self.keypresses, allow_pickle=True)
 
     def update_attempt(self, tolerance=0):
@@ -148,7 +146,6 @@ class ScreenRecorder(object):
 
     def key_check(self, key):
         if wapi.GetAsyncKeyState( key):
-            print("SPACE PRESSED " + str(key))
             return True
         return False
 

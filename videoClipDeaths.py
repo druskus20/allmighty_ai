@@ -17,7 +17,6 @@ def attempt_has_changed(frame1_attempt_area, frame2_attempt_area, tolerance=0): 
     #z_norm = norm(diff.ravel(), 0)    # Zero norm
    
     if m_norm > tolerance:
-        print("mnorm " + str(m_norm))
         return True
     return False
 
@@ -61,9 +60,7 @@ def get_video_segment(videoPath, skip_prev_len=20, skip_next_len=20):
     offset = 0   
     deathFrames, total_frames = videoFindDeaths(vidPath)    
     
-    print("Deathframes: " + str(deathFrames))
     for death in deathFrames:
-        print("OFFSET" + str(offset))
         if (death-skip_prev_len < offset):
             offset = death+skip_next_len
         else:
@@ -79,10 +76,6 @@ def get_video_segment(videoPath, skip_prev_len=20, skip_next_len=20):
 
     if len(segRange) == 0:
         return None
-
-        
-    print (f"Segments: {segRange}")
-
     return segRange
 
 def videoClipDeaths(videoPath, keypresses_path, skip_prev_len=20, skip_next_len=20, cut_attempt=True, savefiles=['keypresses_nodeaths.npz', 'frames_nodeaths.npz', 'video_nodeaths.mp4']):
@@ -150,7 +143,7 @@ def videoClipDeaths(videoPath, keypresses_path, skip_prev_len=20, skip_next_len=
 
     # Check how many frame that new.avi has
     cap2 = cv2.VideoCapture(shotsPath)
-    print(cap2.get(cv2.CAP_PROP_FRAME_COUNT))
+
 
 
 
