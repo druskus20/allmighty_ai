@@ -4,6 +4,9 @@ import os
 from tensorflow.keras.callbacks import ModelCheckpoint
 from tensorflow.keras.models import load_model
 
+from src.keras.model import get_model
+from src.keras.utils import load_dataset
+
 
 def train(
         model,
@@ -34,11 +37,11 @@ def train(
     """
 
     print("Loading test set")
-    X_test, y_test = load_dataset(test_dir, fp=32)
+    X_test, y_test = load_dataset(test_dir)
     print("Loading eval set")
-    X_val, y_val = load_dataset(eval_dir, fp=32)
+    X_val, y_val = load_dataset(eval_dir)
     print("Loading train set")
-    X, y = load_dataset(train_dir, fp=32)
+    X, y = load_dataset(train_dir)
 
     callbacks = [
         ModelCheckpoint(
@@ -74,7 +77,7 @@ def train_new_model(
     print("Loading new model")
 
     max_acc = train(
-        model=get_model((270, 480), 5, 2),
+        model=get_model((144, 256), 5, 2),
         train_dir=train_dir,
         test_dir=test_dir,
         eval_dir=eval_dir,

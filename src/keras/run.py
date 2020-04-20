@@ -13,10 +13,7 @@ from keyboard.keys import key_check, key_press
 from screen import recorder as screen_recorder
 
 
-def run_keras(
-        model_dir,
-        show_current_control: bool,
-) -> None:
+def run_keras(model_dir, show_current_control):
     """
     Generate dataset exampled from a human playing a videogame
     HOWTO:
@@ -41,13 +38,9 @@ def run_keras(
     model = load_model(model_dir)
     stop_recording: threading.Event = threading.Event()
 
-    th_img: threading.Thread = threading.Thread(
-        target=screen_recorder.img_thread, args=[stop_recording]
-    )
-    th_seq: threading.Thread = threading.Thread(
-        target=screen_recorder.image_sequencer_thread, args=[stop_recording]
-    )
+    th_img: threading.Thread = threading.Thread(target=screen_recorder.img_thread, args=[stop_recording])
     th_img.start()
+    th_seq: threading.Thread = threading.Thread(target=screen_recorder.image_sequencer_thread, args=[stop_recording])
     # Wait to launch the image_sequencer_thread, it needs the img_thread to be running
     time.sleep(5)
     th_seq.start()
@@ -59,9 +52,8 @@ def run_keras(
         l = Label(root, textvariable=var, fg="green", font=("Courier", 44))
         l.pack()
 
-    last_time: float = time.time()
+    last_time = time.time()
     model_prediction = np.asarray([0])
-
     while True:
         img_seq = screen_recorder.seq.copy()
         keys = key_check()
@@ -74,7 +66,6 @@ def run_keras(
                 var.set("T.E.D.D. 1104 Driving")
                 l.config(fg="green")
                 root.update()
-
         else:
             if show_current_control:
                 var.set("Manual Control")
@@ -95,7 +86,6 @@ def run_keras(
             th_img.join()
             if show_what_ai_sees:
                 cv2.destroyAllWindows()
-
             break
 
         if "L" in keys:
@@ -116,7 +106,6 @@ def run_keras(
             f"Push J to use to use manual control\n",
             end="\r",
         )
-
         last_time = time.time()
 
 
