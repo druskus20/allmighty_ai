@@ -61,7 +61,7 @@ class ScreenRecorder(object):
     def get_newest_frame(self):
         return self.buffer_read
 
-    def capture_live(self, show=False, save=False, savePath="unnamed.mp4", time_frame=5, cut_attempt=False):
+    def capture_live(self, show=False, save=False, savePath="video_raw.mp4", time_frame=5, cut_attempt=False):
       
         time_start = time.time()
         if save and (savePath != None): 

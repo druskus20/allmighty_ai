@@ -19,7 +19,7 @@ def main():
 
     time.sleep(2)
 
-    n.capture_live(show=True, save=True, savePath="video.mp4", time_frame=60)
+    n.capture_live(show=True, save=True, time_frame=60)
 
     controller.finJuego()
 if __name__ == "__main__":

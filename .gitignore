@@ -4,6 +4,7 @@
 .vscode
 *.npy
 *.npz
+*.mp4
 
 # Impossible game files
 ALURE32.dll

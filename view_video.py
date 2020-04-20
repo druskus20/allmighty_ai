@@ -5,7 +5,7 @@ import numpy as np
 
 keypresses = np.load("keypresses_nodeaths.npz")['arr_0']
 cap = cv2.VideoCapture("video_nodeaths.mp4")
-frames = np.load('FRAMES.npz',  allow_pickle=True)['arr_0']
+frames = np.load('frames_nodeaths.npz',  allow_pickle=True)['arr_0']
 print(len(frames))
 print(len(keypresses))
 

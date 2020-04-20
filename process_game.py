@@ -1,4 +1,4 @@
 from videoClipDeaths import videoClipDeaths
 
-videoClipDeaths("video.mp4", "video_nodeaths.mp4", 100, 15)
+videoClipDeaths("video_raw.mp4", 'keypresses_raw.npz', 100, 15)
 

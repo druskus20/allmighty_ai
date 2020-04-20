@@ -85,11 +85,11 @@ def get_video_segment(videoPath, skip_prev_len=20, skip_next_len=20):
 
     return segRange
 
-def videoClipDeaths(videoPath, output, skip_prev_len=20, skip_next_len=20, cut_attempt=True):
+def videoClipDeaths(videoPath, keypresses_path, skip_prev_len=20, skip_next_len=20, cut_attempt=True, savefiles=['keypresses_nodeaths.npz', 'frames_nodeaths.npz', 'video_nodeaths.mp4']):
 
     vidPath = videoPath
-    shotsPath = output
-    keypresses = np.load('keypresses_raw.npz',  allow_pickle=True)['arr_0']
+    shotsPath = savefiles[2]
+    keypresses = np.load(keypresses_path,  allow_pickle=True)['arr_0']
     
     segRange = get_video_segment(vidPath, skip_prev_len, skip_next_len)
     
@@ -104,11 +104,9 @@ def videoClipDeaths(videoPath, output, skip_prev_len=20, skip_next_len=20, cut_a
     ## CUT KEYS ###
     new_keypresses = []
     for r in segRange:
-        print(f"aaaa {int(r[0])}:{int(r[1])}")
-        print(f"aaaa {keypresses[int(r[0]):int(r[1])]}")
         new_keypresses.extend(keypresses[int(r[0]):int(r[1])])
 
-    np.savez_compressed("keypresses_nodeaths.npz", np.asarray(new_keypresses))
+    np.savez_compressed(savefiles[0], np.asarray(new_keypresses))
 
     ### CUT VIDEO ###
     # Open the video
@@ -148,7 +146,7 @@ def videoClipDeaths(videoPath, output, skip_prev_len=20, skip_next_len=20, cut_a
                 break
 
     writer.release()
-    np.savez_compressed("FRAMES.npz", np.asarray(new_frames), allow_pickle=True)
+    np.savez_compressed(savefiles[1], np.asarray(new_frames), allow_pickle=True)
 
     # Check how many frame that new.avi has
     cap2 = cv2.VideoCapture(shotsPath)
