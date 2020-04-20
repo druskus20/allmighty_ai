@@ -8,7 +8,7 @@ import torch.nn as nn
 import torchvision.models as models
 import torchvision.models.resnet
 
-from src.utils import nn_batchs
+from src.pytorch.utils import nn_batchs
 
 
 def get_resnet(model: int, pretrained: bool) -> torchvision.models.resnet.ResNet:
