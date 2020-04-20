@@ -72,7 +72,7 @@ def preprocess_image(image):
     Output:
     - numpy ndarray: [480,270,3]
     """
-    return np.asarray(cv2.resize(image, (480, 270)), dtype=np.uint8)
+    return np.asarray(cv2.resize(image, (256, 144)), dtype=np.uint8)
 
 
 def image_sequencer_thread(stop_event: threading.Event) -> None:
