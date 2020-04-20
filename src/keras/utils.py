@@ -4,19 +4,11 @@ import os
 import numpy as np
 from tensorflow.keras.utils import to_categorical
 
-
-def reshape_y(data: np.ndarray):
-    """
-    Get gold values from data. multi-hot vector to one-hot vector
-    Input:
-     - data: ndarray [num_examples x 6]
-    Output:
-    - ndarray [num_examples]
-    """
-    return to_categorical(data[:, 5])
+mean = np.array([0.485, 0.456, 0.406], dtype=np.float32)
+std = np.array([0.229, 0.224, 0.225], dtype=np.float32)
 
 
-def reshape_x(data, dtype=np.float16):
+def reshape_x(data):
     """
     Get images from data as a list and preprocess them.
     Input:
@@ -26,19 +18,19 @@ def reshape_x(data, dtype=np.float16):
     Output:
     - ndarray [num_examples * 5, num_channels, H, W]
     """
-    mean = np.array([0.485, 0.456, 0.406], dtype)
-    std = np.array([0.229, 0.224, 0.225], dtype)
     ims_seqs = []
     for i in range(0, len(data)):
         frames = []
         for j in range(0, 5):
-            img = np.array(data[i][j], dtype=dtype) / 255
+            img = np.array(data[i][j], dtype=np.float32) / 255
             frames.append((img - mean) / std)
         ims_seqs.append(frames)
-    return np.asarray(ims_seqs)
+        del frames
+    ims_seqs = np.asarray(ims_seqs)
+    return ims_seqs
 
 
-def load_file(path: str, fp: int = 16) -> (np.ndarray, np.ndarray):
+def load_file(path):
     """
     Load dataset from file: Load, reshape and preprocess data.
     Input:
@@ -58,11 +50,12 @@ def load_file(path: str, fp: int = 16) -> (np.ndarray, np.ndarray):
         return np.array([]), np.array([])
 
     X = reshape_x(data)
-    y = reshape_y(data)
+    y = to_categorical(data[:, 5])
+    del data
     return X, y
 
 
-def load_dataset(path: str, fp: int = 32) -> (np.ndarray, np.ndarray):
+def load_dataset(path: str) -> (np.ndarray, np.ndarray):
     """
     Load dataset from directory: Load, reshape and preprocess data for all the files in a directory.
     Input:
@@ -78,7 +71,7 @@ def load_dataset(path: str, fp: int = 32) -> (np.ndarray, np.ndarray):
     files = glob.glob(os.path.join(path, "*.npz"))
     for file_n, file in enumerate(files):
         print(f"Loading file {file_n + 1} of {len(files)}...")
-        X_batch, y_batch = load_file(file, fp)
+        X_batch, y_batch = load_file(file)
         if len(X_batch) > 0 and len(y_batch) > 0:
             if len(X) == 0:
                 X = X_batch
@@ -86,6 +79,7 @@ def load_dataset(path: str, fp: int = 32) -> (np.ndarray, np.ndarray):
             else:
                 X = np.concatenate((X, X_batch), axis=0)
                 y = np.concatenate((y, y_batch), axis=0)
+        del X_batch, y_batch
 
     if len(X) == 0 or len(y) == 0:
         # Since this function is used for loading the dev and test set, we want to stop the execution if we don't

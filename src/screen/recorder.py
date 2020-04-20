@@ -72,8 +72,7 @@ def preprocess_image(image):
     Output:
     - numpy ndarray: [480,270,3]
     """
-    processed_image = cv2.resize(image, (480, 270))
-    return np.asarray(processed_image, dtype=np.uint8, )
+    return np.asarray(cv2.resize(image, (480, 270)), dtype=np.uint8)
 
 
 def image_sequencer_thread(stop_event: threading.Event) -> None:
@@ -95,9 +94,7 @@ def image_sequencer_thread(stop_event: threading.Event) -> None:
         last_time = time.time()
 
         seq, num, key_out = (
-            np.concatenate(
-                (seq[1:], [preprocess_image(np.copy(back_buffer))]), axis=0,
-            ),
+            np.concatenate((seq[1:], [preprocess_image(np.copy(back_buffer))]), axis=0),
             num + 1,
             keys_to_output(key_check()),
         )
