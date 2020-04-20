@@ -2,11 +2,16 @@
 *.jpg
 *.core
 .vscode
+*.npy
+*.npz
+*.mp4
+*.pdf
+src/models*
+
 
 # Impossible game files
 ALURE32.dll
 Editor.bat
-IGG-GAMES.COM.url
 ImpossibleGame.exe
 OpenAL32.dll
 Profile

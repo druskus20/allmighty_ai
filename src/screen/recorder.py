@@ -72,7 +72,7 @@ def preprocess_image(image):
     Output:
     - numpy ndarray: [480,270,3]
     """
-    processed_image = cv2.resize(image, (480, 270))
+    processed_image = cv2.resize(image, (520/2, 476/2))
     return np.asarray(processed_image, dtype=np.uint8, )
 
 
@@ -121,17 +121,17 @@ def initialize_global_variables() -> None:
     global key_out
 
     fps = 10
-    grb = Grabber(bbox=(1, 26, 1601, 926))
-    front_buffer = np.zeros((1600, 900), dtype=np.int8)
-    back_buffer = np.zeros((1600, 900), dtype=np.int8)
+    grb = Grabber(bbox=(201, 126, 721,  576+26))
+    front_buffer = np.zeros((520, 476), dtype=np.int8)
+    back_buffer = np.zeros((520, 476), dtype=np.int8)
     num = 0
     seq = np.asarray(
         [
-            np.zeros((270, 480, 3)),
-            np.zeros((270, 480, 3)),
-            np.zeros((270, 480, 3)),
-            np.zeros((270, 480, 3)),
-            np.zeros((270, 480, 3)),
+            np.zeros((520/2, 476/2, 3)),
+            np.zeros((520/2, 476/2, 3)),
+            np.zeros((520/2, 476/2, 3)),
+            np.zeros((520/2, 476/2, 3)),
+            np.zeros((520/2, 476/2, 3)),
         ],
         dtype=np.uint8,
     )
