@@ -8,9 +8,9 @@ import numpy as np
 from tensorflow.keras.models import load_model
 from utils import reshape_x
 
-from src.keyboard.input_handler import select_key
-from src.keyboard.keys import key_check, key_press
-from src.screen import recorder as screen_recorder
+from keyboard.input_handler import select_key
+from keyboard.keys import key_check, key_press
+from screen import recorder as screen_recorder
 
 
 def run_keras(
