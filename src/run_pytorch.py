@@ -7,12 +7,11 @@ from tkinter import *
 import cv2
 import numpy as np
 import torch
-
 from keyboard.input_handler import select_key
 from keyboard.keys import key_check, key_press
 from model_pytorch import load_model, TEDD1104
 from screen import recorder as screen_recorder
-from utils import reshape_x, mse
+from utils import reshape_x
 
 if torch.cuda.is_available():
     device = torch.device("cuda:0")
@@ -27,7 +26,6 @@ def run_TED1104(
         model_dir,
         fp16: bool,
         show_current_control: bool,
-        evasion_score=1000,
 ) -> None:
     """
     Generate dataset exampled from a human playing a videogame
@@ -130,7 +128,6 @@ def run_TED1104(
             f"Recording at {screen_recorder.fps} FPS\n"
             f"Actions per second {None if time_it == 0 else 1 / time_it}\n"
             f"Key predicted by nn: {key_press(model_prediction[0])}\n"
-
             f"Push QE to exit\n"
             f"Push L to see the input images\n"
             f"Push J to use to use manual control\n",
@@ -164,12 +161,6 @@ if __name__ == "__main__":
         help="Show a window with text that indicates if the car is currently being driven by the AI or a human",
     )
 
-    parser.add_argument(
-        "--evasion_score",
-        type=float,
-        default=200,
-        help="Mean squared error value between images to activate the evasion maneuvers",
-    )
 
     args = parser.parse_args()
 
@@ -178,7 +169,5 @@ if __name__ == "__main__":
     run_TED1104(
         model_dir=args.model_dir,
         fp16=args.fp16,
-
         show_current_control=args.show_current_control,
-        evasion_score=args.evasion_score,
     )
