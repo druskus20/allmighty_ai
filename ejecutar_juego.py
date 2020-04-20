@@ -9,7 +9,6 @@ controller.position_window()
 time.sleep(3)
 print("COMENZAMOS")
 controller.iniciarPartida()
-
 time.sleep(2)
 print("SALTAMOS")
 controller.accion(1)

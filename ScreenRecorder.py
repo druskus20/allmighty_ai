@@ -61,12 +61,17 @@ class ScreenRecorder(object):
     def get_newest_frame(self):
         return self.buffer_read
 
-    def capture_live(self, show=False, save=False, savePath="unnamed.mp4", time_frame=5):
+    def capture_live(self, show=False, save=False, savePath="unnamed.mp4", time_frame=5, cut_attempt=False):
         
         time_start = time.time()
         if save and (savePath != None): 
             fps=60 # !!!
-            size = (self.dimmensions[0], self.dimmensions[1])
+            
+            if cut_attempt:
+                size = (self.dimmensions[0]-200, self.dimmensions[1]-100)
+            else:
+                size = (self.dimmensions[0], self.dimmensions[1])
+
             fourcc = cv2.VideoWriter_fourcc(*'XVID')
             writer = cv2.VideoWriter(savePath, fourcc, fps, size)  
 
@@ -78,19 +83,28 @@ class ScreenRecorder(object):
                 break
 
             self.refresh_frame()
-            print("SPACE_PRESSED? " + str(self.space_pressed))
             self.update_attempt()
-            
+                    
+            # Recortar el frame
+            if cut_attempt:
+                frame = self.reduce_frame(self.buffer_read)
+            else:
+                frame = self.buffer_read
+
             # Muestra la grabacion
             if show:
-                frame = self.buffer_read
+                #frame = self.buffer_read
                 cv2.imshow('frame',frame)
                 cv2.waitKey(1) 
 
             if save:
-                frame = self.buffer_read
+                #frame = self.buffer_read
+                time.sleep(0.01)
                 writer.write(frame)
-        
+
+            # Save array numpy
+            # !!!!
+    
         if save: 
             writer.release()
 
@@ -125,3 +139,8 @@ class ScreenRecorder(object):
         return False
 
 
+    def reduce_frame(self, frame):
+        return frame[100:, 200:] 
+
+
+       

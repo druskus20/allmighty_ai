@@ -83,7 +83,7 @@ def get_video_segment(videoPath, skip_prev_len=20, skip_next_len=20):
 
     return segRange
 
-def videoClipDeaths(videoPath, output, skip_prev_len=20, skip_next_len=20):
+def videoClipDeaths(videoPath, output, skip_prev_len=20, skip_next_len=20, cut_attempt=True):
 
     vidPath = videoPath
     shotsPath = output
@@ -97,7 +97,14 @@ def videoClipDeaths(videoPath, output, skip_prev_len=20, skip_next_len=20):
     # Open the video
     cap = cv2.VideoCapture(vidPath)
     fps = int(cap.get(cv2.CAP_PROP_FPS))
+
+
+    
     size = (int(cap.get(cv2.CAP_PROP_FRAME_WIDTH)),int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT)))
+    if cut_attempt == True:
+        size = (int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))-200,int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))-100)
+       
+
     dimmensions = size + (3, )
     frame =  np.zeros(dimmensions, dtype=np.int8)
     fourcc = cv2.VideoWriter_fourcc(*'XVID')
@@ -110,7 +117,11 @@ def videoClipDeaths(videoPath, output, skip_prev_len=20, skip_next_len=20):
         while (cap.isOpened() and ret and writer.isOpened()):
             ret, frame = cap.read()
             frame_number = cap.get(cv2.CAP_PROP_POS_FRAMES) - 1
- 
+    
+            # Cut attempt area
+            if cut_attempt == True:
+                frame = frame[100:, 200:] 
+                
 
             # End contition
             if frame_number < endFidx:

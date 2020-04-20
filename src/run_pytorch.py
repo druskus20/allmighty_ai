@@ -130,7 +130,7 @@ def run_TED1104(
             f"Recording at {screen_recorder.fps} FPS\n"
             f"Actions per second {None if time_it == 0 else 1 / time_it}\n"
             f"Key predicted by nn: {key_press(model_prediction[0])}\n"
-            f"Difference from img 1 to img 5 {None if not enable_evasion else score}\n"
+
             f"Push QE to exit\n"
             f"Push L to see the input images\n"
             f"Push J to use to use manual control\n",
@@ -178,7 +178,7 @@ if __name__ == "__main__":
     run_TED1104(
         model_dir=args.model_dir,
         fp16=args.fp16,
-        enable_evasion=args.enable_evasion,
+
         show_current_control=args.show_current_control,
         evasion_score=args.evasion_score,
     )
