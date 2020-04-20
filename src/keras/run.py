@@ -5,12 +5,12 @@ from tkinter import *
 
 import cv2
 import numpy as np
-from keyboard.input_handler import select_key
-from keyboard.keys import key_check, key_press
-from screen import recorder as screen_recorder
 from tensorflow.keras.models import load_model
+from utils import reshape_x
 
-from src.keras.train import reshape_x
+from src.keyboard.input_handler import select_key
+from src.keyboard.keys import key_check, key_press
+from src.screen import recorder as screen_recorder
 
 
 def run_keras(
@@ -67,8 +67,8 @@ def run_keras(
         keys = key_check()
         if not "J" in keys:
             X = reshape_x(np.array([img_seq]))
-            model_prediction = model.predict(X)
-            select_key(model_prediction.argmax(axis=-1))
+            model_prediction = model.predict(X).argmax(axis=-1)
+            select_key(model_prediction)
 
             if show_current_control:
                 var.set("T.E.D.D. 1104 Driving")
@@ -110,7 +110,7 @@ def run_keras(
         print(
             f"Recording at {screen_recorder.fps} FPS\n"
             f"Actions per second {None if time_it == 0 else 1 / time_it}\n"
-            f"Key predicted by nn: {key_press(model_prediction[0])}\n"
+            f"Key predicted by nn: {key_press(model_prediction)}\n"
             f"Push QE to exit\n"
             f"Push L to see the input images\n"
             f"Push J to use to use manual control\n",

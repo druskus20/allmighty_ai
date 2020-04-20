@@ -3,8 +3,9 @@ import time
 
 import cv2
 import numpy as np
-from keyboard.keys import key_check
-from screen.grabber import Grabber
+
+from src.keyboard.keys import key_check
+from src.screen.grabber import Grabber
 
 global fps
 global grb
