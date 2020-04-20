@@ -5,6 +5,9 @@
 *.npy
 *.npz
 *.mp4
+*.pdf
+src/models*
+
 
 # Impossible game files
 ALURE32.dll
