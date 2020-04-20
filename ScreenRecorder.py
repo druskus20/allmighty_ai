@@ -72,7 +72,7 @@ class ScreenRecorder(object):
             else:
                 size = (self.dimmensions[0], self.dimmensions[1])
 
-            fourcc = cv2.VideoWriter_fourcc(*'XVID')
+            fourcc = cv2.VideoWriter_fourcc(*'mp4v')
             writer = cv2.VideoWriter(savePath, fourcc, fps, size)  
 
         self.attempt_startime = time.time()

@@ -122,7 +122,7 @@ def videoClipDeaths(videoPath, keypresses_path, skip_prev_len=20, skip_next_len=
     new_frames =  []
     dimmensions = size + (3, )
     frame =  np.zeros(dimmensions, dtype=np.int8)
-    fourcc = cv2.VideoWriter_fourcc(*'XVID')
+    fourcc = cv2.VideoWriter_fourcc(*'mp4v')
     writer = cv2.VideoWriter(shotsPath, fourcc, fps, size)
     
     # Iterate through the frames of the video from segRange
@@ -154,5 +154,23 @@ def videoClipDeaths(videoPath, keypresses_path, skip_prev_len=20, skip_next_len=
 
 
 
+def group_frames(framesPath, keypressesPath,   savefile='processed_data.npz'):
+    keypresses = np.load(keypressesPath,  allow_pickle=True)['arr_0']
+    frames = np.load(framesPath,  allow_pickle=True)['arr_0']
+    data = []
+    # Groups 5 frames and a keypress
+    i = 0
+    while (i+5 < len(frames)): # Discards last elements if necessary
+        f1 = frames[i]
+        f2 = frames[i+1]
+        f3 = frames[i+2]
+        f4 = frames[i+3]
+        f5 = frames[i+4]
+        key = any(keypresses[i:i+5])    
 
-
+        framegroup = [f1, f2, f3, f4, f5, key]
+        data.append(framegroup)
+        i+=5
+    
+    np.savez_compressed(savefile, np.asarray(framegroup), allow_pickle=True)
+    print(f"Frames agrupados, dataset guardado en {savefile}")

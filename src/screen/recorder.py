@@ -72,6 +72,7 @@ def preprocess_image(image):
     Output:
     - numpy ndarray: [480,270,3]
     """
+    # 260 / 238
     processed_image = cv2.resize(image, (520/2, 476/2))
     return np.asarray(processed_image, dtype=np.uint8, )
 
