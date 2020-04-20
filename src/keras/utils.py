@@ -18,10 +18,13 @@ def reshape_x(data):
     Output:
     - ndarray [num_examples * 5, num_channels, H, W]
     """
+
+    
     ims_seqs = []
     for i in range(0, len(data)):
         frames = []
         for j in range(0, 5):
+
             img = np.array(data[i][j], dtype=np.float32) / 255
             frames.append((img - mean) / std)
         ims_seqs.append(frames)

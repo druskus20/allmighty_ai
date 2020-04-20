@@ -4,8 +4,8 @@ import os
 from tensorflow.keras.callbacks import ModelCheckpoint
 from tensorflow.keras.models import load_model
 
-from src.keras.model import get_model
-from src.keras.utils import load_dataset
+from model import get_model
+from utils import load_dataset
 
 
 def train(
@@ -77,7 +77,7 @@ def train_new_model(
     print("Loading new model")
 
     max_acc = train(
-        model=get_model((144, 256), 5, 2),
+        model=get_model((476//2, 520//2), 5, 2),
         train_dir=train_dir,
         test_dir=test_dir,
         eval_dir=eval_dir,
