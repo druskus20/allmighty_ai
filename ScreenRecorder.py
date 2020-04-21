@@ -40,9 +40,7 @@ class ScreenRecorder(object):
 
         self.space_pressed = False   
 
-    def resize_image(self, image, res=(720, 576)):
-        pr_image = cv2.resize(image, res)
-        return np.asarray(pr_image, dtype=np.uint8)
+   
 
     # Grabs a frame and sotores it in buffer[buffer_head]
     # Also grabs the key value

@@ -14,7 +14,7 @@ def main():
     time.sleep(10)
     controller.position_window()
     time.sleep(3)
-    print("COMENZAMOS")
+
     controller.iniciarPartida()
 
     time.sleep(2)
