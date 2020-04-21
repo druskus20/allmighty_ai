@@ -23,7 +23,7 @@ def reshape_x(data):
     ims_seqs = []
     for i in range(0, len(data)):
         frames = []
-        for j in range(0, 5):
+        for j in range(0, 3):
 
             img = np.array(data[i][j], dtype=np.float32) / 255
             frames.append((img - mean) / std)
@@ -53,7 +53,7 @@ def load_file(path):
         return np.array([]), np.array([])
 
     X = reshape_x(data)
-    y = to_categorical(data[:, 5])
+    y = to_categorical(data[:, 3])
     del data
     return X, y
 

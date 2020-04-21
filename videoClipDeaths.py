@@ -159,20 +159,18 @@ def group_frames(framesPath, keypressesPath,   savefile='processed_data.npz'):
     data = []
     # Groups 5 frames and a keypress
     i = 0
-    while (i+5 < len(frames)): # Discards last elements if necessary
+    while (i+3 < len(frames)): # Discards last elements if necessary
         f1 = resize_image(frames[i])
         f2 = resize_image(frames[i+1])
         f3 = resize_image(frames[i+2])
-        f4 = resize_image(frames[i+3])
-        f5 = resize_image(frames[i+4])
-        if (any(keypresses[i:i+5])):
+        if (any(keypresses[i:i+3])):
             key = 1
         else:
             key = 0
 
-        framegroup = [f1, f2, f3, f4, f5, np.asarray([key])]
+        framegroup = [f1, f2, f3, np.asarray([key])]
         data.append(framegroup)
-        i+=5
+        i+=3
     
    
     np.savez_compressed(savefile, np.asarray(data), allow_pickle=True)

@@ -59,8 +59,6 @@ def train(
     results = model.evaluate(X_test, y_test, batch_size=batch_size)
     print('test loss, test acc:', results)
 
-    model.save(os.path.join(output_dir), "model")
-
     return results[1]
 
 
@@ -77,7 +75,7 @@ def train_new_model(
     print("Loading new model")
 
     max_acc = train(
-        model=get_model((476//2, 520//2), 5, 2),
+        model=get_model((476//2, 520//2), 3, 2),
         train_dir=train_dir,
         test_dir=test_dir,
         eval_dir=eval_dir,

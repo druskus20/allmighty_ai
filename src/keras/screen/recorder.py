@@ -135,9 +135,7 @@ def initialize_global_variables() -> None:
             np.zeros(sizes),
             np.zeros(sizes),
             np.zeros(sizes),
-            np.zeros(sizes),  
-            np.zeros(sizes),
         ],
         dtype=np.uint8,
     )
-    key_out = np.array([0, 0, 0, 0])
+    key_out = np.array([0])
