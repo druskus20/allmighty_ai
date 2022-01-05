@@ -16,7 +16,7 @@ We can test our model by running the game and letting the neural network decide 
 Yes, but if the neural network lacks speed, you can always try reducing the speed of the game using [Cheat Engine](https://www.cheatengine.org)
 
 ## Reference
-[Video](https://youtu.be/u9vJA7DSV2c)
+[Video](https://youtu.be/OXQ6HT45AMs)
 
 This project is based on: 
 https://github.com/ikergarcia1996/Self-Driving-Car-in-Video-Games
